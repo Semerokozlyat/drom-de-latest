@@ -1,6 +1,8 @@
 import SideNav from 'app/ui/dashboard/sidenav';
 import React from "react";
 
+export const experimental_ppr = true;  // Partial pre-rendering of page components.
+
 export default function Layout({ children }: { children: React.ReactNode }) {
     return (
         <div className="flex flex-col md:flex-row md:overflow-hidden h-screen">
