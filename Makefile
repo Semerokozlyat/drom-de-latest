@@ -1,8 +1,7 @@
 
-.PHONY: lint-frontend
-lint-frontend:
+.PHONY: lint
+lint:
 	pnpm lint
-
 
 .PHONY: run-frontend
 run-frontend:
