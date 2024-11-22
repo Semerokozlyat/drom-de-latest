@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import { db } from '@vercel/postgres';
-import { invoices, customers, revenue, users } from '../lib/placeholder-data';
+import { invoices, customers, revenue, users, reviews } from '../lib/placeholder-data';
 
 const client = await db.connect();
 
@@ -53,6 +53,35 @@ async function seedInvoices() {
   );
 
   return insertedInvoices;
+}
+
+async function seedReviews() {
+  await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+
+  await client.sql`
+    CREATE TABLE IF NOT EXISTS reviews (
+      id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+      customer_id UUID NOT NULL,
+      title VARCHAR(255) NOT NULL,
+      status VARCHAR(255) NOT NULL,
+      created_at DATE NOT NULL,
+      updated_at DATE NOT NULL,
+      next_part_id UUID DEFAULT NULL,
+      text TEXT
+    );
+  `;
+
+  const insertedReviews = await Promise.all(
+      reviews.map(
+          (review) => client.sql`
+        INSERT INTO reviews (customer_id, title, status, created_at, updated_at, next_part_id, text)
+        VALUES (${review.customer_id}, ${review.title}, ${review.status}, ${review.created_at}, ${review.updated_at}, ${review.next_part_id}, ${review.text})
+        ON CONFLICT (id) DO NOTHING;
+      `,
+      ),
+  );
+
+  return insertedReviews;
 }
 
 async function seedCustomers() {
@@ -108,6 +137,7 @@ export async function GET() {
     await seedCustomers();
     await seedInvoices();
     await seedRevenue();
+    await seedReviews();
     await client.sql`COMMIT`;
 
     return Response.json({ message: 'Database seeded successfully' });

@@ -48,6 +48,36 @@ const customers = [
   },
 ];
 
+const reviews = [
+  {
+    customer_id: customers[0].id,
+    title: 'Test review 1',
+    status: 'published',
+    created_at: '2022-12-06',
+    updated_at: '2022-12-12',
+    next_part_id: '',
+    text: 'Test review text 1',
+  },
+  {
+    customer_id: customers[1].id,
+    title: 'Test review 2',
+    status: 'archived',
+    created_at: '2023-07-19',
+    updated_at: '2023-08-12',
+    next_part_id: '',
+    text: 'Test review text 2',
+  },
+  {
+    customer_id: customers[4].id,
+    title: 'Test review 4',
+    status: 'published',
+    created_at: '2024-04-06',
+    updated_at: '2024-05-12',
+    next_part_id: '',
+    text: 'Test review text 4',
+  },
+]
+
 const invoices = [
   {
     customer_id: customers[0].id,
@@ -144,4 +174,4 @@ const revenue = [
   { month: 'Dec', revenue: 4800 },
 ];
 
-export { users, customers, invoices, revenue };
+export { users, customers, invoices, revenue, reviews };

@@ -26,6 +26,19 @@ export type Invoice = {
   status: 'pending' | 'paid';
 };
 
+export type Review = {
+  id: string;
+  customer_id: string;
+  title: string;
+  // In TypeScript, this is called a string union type.
+  // It means that the "status" property can only be one of the two strings: 'pending' or 'paid'.
+  status: 'published' | 'archived';
+  created_at: string;
+  updated_at: string;
+  next_part_id: string;
+  text: string;
+};
+
 export type Revenue = {
   month: string;
   revenue: number;
