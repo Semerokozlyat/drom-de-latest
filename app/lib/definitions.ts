@@ -31,10 +31,22 @@ export type Review = {
   customer_id: string;
   title: string;
   // In TypeScript, this is called a string union type.
-  // It means that the "status" property can only be one of the two strings: 'pending' or 'paid'.
-  status: 'published' | 'archived';
+  // It means that the "status" property can only be one of the following strings: 'pending', 'published' or 'archived'.
+  status: 'pending' | 'published' | 'archived';
   created_at: string;
   updated_at: string;
+  next_part_id: string;
+  text: string;
+};
+
+export type ReviewsTable = {
+  id: string;
+  customer_id: string;
+  title: string;
+  status: 'pending' | 'published' | 'archived';
+  created_at: string;
+  updated_at: string;
+  image_url: string;   // taken from corresponding customer
   next_part_id: string;
   text: string;
 };

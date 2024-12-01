@@ -6,6 +6,7 @@ import {
   InvoicesTable,
   LatestInvoiceRaw,
   Revenue,
+  ReviewsTable,
 } from './definitions';
 import { formatCurrency } from './utils';
 
@@ -162,6 +163,63 @@ export async function fetchInvoiceById(id: string) {
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch invoice.');
+  }
+}
+
+export async function fetchReviewsPages(query: string) {
+  try {
+    const count = await sql`SELECT COUNT(*)
+    FROM reviews
+    JOIN customers ON reviews.customer_id = customers.id
+    WHERE
+      customers.name ILIKE ${`%${query}%`} OR
+      customers.email ILIKE ${`%${query}%`} OR
+      reviews.created_at::text ILIKE ${`%${query}%`} OR
+      reviews.updated_at::text ILIKE ${`%${query}%`} OR
+      reviews.title ILIKE ${`%${query}%`} OR
+      reviews.status ILIKE ${`%${query}%`}
+  `;
+
+    const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
+    return totalPages;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch total number of reviews.');
+  }
+}
+
+export async function fetchFilteredReviews(
+    query: string,
+    currentPage: number,
+) {
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+
+  try {
+    const reviews = await sql<ReviewsTable>`
+      SELECT
+        reviews.id,
+        reviews.created_at,
+        reviews.status,
+        customers.name,
+        customers.email,
+        customers.image_url
+      FROM reviews
+      JOIN customers ON reviews.customer_id = customers.id
+      WHERE
+        customers.name ILIKE ${`%${query}%`} OR
+        customers.email ILIKE ${`%${query}%`} OR
+        reviews.created_at::text ILIKE ${`%${query}%`} OR
+        reviews.updated_at::text ILIKE ${`%${query}%`} OR
+        reviews.title ILIKE ${`%${query}%`} OR
+        reviews.status ILIKE ${`%${query}%`}
+      ORDER BY reviews.created_at DESC
+      LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
+    `;
+
+    return reviews.rows;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch reviews by filter.');
   }
 }
 

@@ -1,7 +1,7 @@
 import { fetchFilteredReviews } from 'app/lib/data';
 import Image from "next/image";
-import InvoiceStatus from "@/app/ui/invoices/status";
-import {formatCurrency, formatDateToLocal} from "@/app/lib/utils";
+import ReviewStatus from "@/app/ui/reviews/status";
+import { formatDateToLocal } from "@/app/lib/utils";
 import {DeleteInvoice, UpdateInvoice} from "@/app/ui/invoices/buttons";
 
 export default async function ReviewsTable(
@@ -33,9 +33,9 @@ export default async function ReviewsTable(
                                             />
                                             <p>{review.title}</p>
                                         </div>
-                                        <p className="text-sm text-gray-500">{invoice.email}</p>
+                                        <p className="text-sm text-gray-500">{review.customer_id}</p>
                                     </div>
-                                    <InvoiceStatus status={invoice.status} />
+                                    <ReviewStatus status={review.status} />
                                 </div>
                                 <div className="flex w-full items-center justify-between pt-4">
                                     <div>
@@ -74,39 +74,36 @@ export default async function ReviewsTable(
                         </tr>
                         </thead>
                         <tbody className="bg-white">
-                        {invoices?.map((invoice) => (
+                        {reviews?.map((review) => (
                             <tr
-                                key={invoice.id}
+                                key={review.id}
                                 className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg"
                             >
                                 <td className="whitespace-nowrap py-3 pl-6 pr-3">
                                     <div className="flex items-center gap-3">
                                         <Image
-                                            src={invoice.image_url}
+                                            src={review.image_url}
                                             className="rounded-full"
                                             width={28}
                                             height={28}
-                                            alt={`${invoice.name}'s profile picture`}
+                                            alt={`${review.title}'s profile picture`}
                                         />
-                                        <p>{invoice.name}</p>
+                                        <p>{review.title}</p>
                                     </div>
                                 </td>
                                 <td className="whitespace-nowrap px-3 py-3">
-                                    {invoice.email}
+                                    {review.title}
                                 </td>
                                 <td className="whitespace-nowrap px-3 py-3">
-                                    {formatCurrency(invoice.amount)}
+                                    {formatDateToLocal(review.created_at)}
                                 </td>
                                 <td className="whitespace-nowrap px-3 py-3">
-                                    {formatDateToLocal(invoice.date)}
-                                </td>
-                                <td className="whitespace-nowrap px-3 py-3">
-                                    <InvoiceStatus status={invoice.status} />
+                                    <ReviewStatus status={review.status} />
                                 </td>
                                 <td className="whitespace-nowrap py-3 pl-6 pr-3">
                                     <div className="flex justify-end gap-3">
-                                        <UpdateInvoice id={invoice.id} />
-                                        <DeleteInvoice id={invoice.id} />
+                                        <UpdateInvoice id={review.id} />
+                                        <DeleteInvoice id={review.id} />
                                     </div>
                                 </td>
                             </tr>

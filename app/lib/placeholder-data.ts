@@ -55,7 +55,7 @@ const reviews = [
     status: 'published',
     created_at: '2022-12-06',
     updated_at: '2022-12-12',
-    next_part_id: '',
+    //next_part_id: '0',
     text: 'Test review text 1',
   },
   {
@@ -64,7 +64,7 @@ const reviews = [
     status: 'archived',
     created_at: '2023-07-19',
     updated_at: '2023-08-12',
-    next_part_id: '',
+    //next_part_id: '0',
     text: 'Test review text 2',
   },
   {
@@ -73,7 +73,7 @@ const reviews = [
     status: 'published',
     created_at: '2024-04-06',
     updated_at: '2024-05-12',
-    next_part_id: '',
+    //next_part_id: '0',
     text: 'Test review text 4',
   },
 ]
