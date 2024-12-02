@@ -46,6 +46,7 @@ export type ReviewsTable = {
   status: 'pending' | 'published' | 'archived';
   created_at: string;
   updated_at: string;
+  author_name : string;  // taken from corresponding customer
   image_url: string;   // taken from corresponding customer
   next_part_id: string;
   text: string;

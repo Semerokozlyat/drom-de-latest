@@ -2,7 +2,7 @@ import { fetchFilteredReviews } from 'app/lib/data';
 import Image from "next/image";
 import ReviewStatus from "@/app/ui/reviews/status";
 import { formatDateToLocal } from "@/app/lib/utils";
-import {DeleteInvoice, UpdateInvoice} from "@/app/ui/invoices/buttons";
+import {DeleteReview, ObserveReview, UpdateReview} from "@/app/ui/reviews/buttons";
 
 export default async function ReviewsTable(
     {query, currentPage}: {
@@ -29,9 +29,9 @@ export default async function ReviewsTable(
                                                 className="mr-2 rounded-full"
                                                 width={28}
                                                 height={28}
-                                                alt={`${review.title} title image`}
+                                                alt={`${review.author_name} author profile image`}
                                             />
-                                            <p>{review.title}</p>
+                                            <p>{review.author_name}</p>
                                         </div>
                                         <p className="text-sm text-gray-500">{review.customer_id}</p>
                                     </div>
@@ -43,8 +43,8 @@ export default async function ReviewsTable(
                                         <p>{formatDateToLocal(review.updated_at)}</p>
                                     </div>
                                     <div className="flex justify-end gap-2">
-                                        <UpdateInvoice id={review.id} />
-                                        <DeleteInvoice id={review.id} />
+                                        <UpdateReview id={review.id} />
+                                        <DeleteReview id={review.id} />
                                     </div>
                                 </div>
                             </div>
@@ -54,16 +54,13 @@ export default async function ReviewsTable(
                         <thead className="rounded-lg text-left text-sm font-normal">
                         <tr>
                             <th scope="col" className="px-4 py-5 font-medium sm:pl-6">
-                                Customer
+                                Author
                             </th>
                             <th scope="col" className="px-3 py-5 font-medium">
-                                Email
+                                Title
                             </th>
                             <th scope="col" className="px-3 py-5 font-medium">
-                                Amount
-                            </th>
-                            <th scope="col" className="px-3 py-5 font-medium">
-                                Date
+                                Updated At
                             </th>
                             <th scope="col" className="px-3 py-5 font-medium">
                                 Status
@@ -86,24 +83,24 @@ export default async function ReviewsTable(
                                             className="rounded-full"
                                             width={28}
                                             height={28}
-                                            alt={`${review.title}'s profile picture`}
+                                            alt={`${review.author_name}'s profile picture`}
                                         />
-                                        <p>{review.title}</p>
+                                        <p>{review.author_name}</p>
                                     </div>
                                 </td>
                                 <td className="whitespace-nowrap px-3 py-3">
                                     {review.title}
                                 </td>
                                 <td className="whitespace-nowrap px-3 py-3">
-                                    {formatDateToLocal(review.created_at)}
+                                    {formatDateToLocal(review.updated_at)}
                                 </td>
                                 <td className="whitespace-nowrap px-3 py-3">
                                     <ReviewStatus status={review.status} />
                                 </td>
                                 <td className="whitespace-nowrap py-3 pl-6 pr-3">
                                     <div className="flex justify-end gap-3">
-                                        <UpdateInvoice id={review.id} />
-                                        <DeleteInvoice id={review.id} />
+                                        <ObserveReview id={review.id} />
+                                        <DeleteReview id={review.id} />
                                     </div>
                                 </td>
                             </tr>

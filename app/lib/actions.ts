@@ -118,3 +118,17 @@ export async function deleteInvoice(id: string) {
         return {message: 'Database Error: Failed to delete Invoice.'};
     }
 }
+
+// Actions with Reviews
+
+export async function deleteReview(id: string) {
+    try {
+        await sql`DELETE
+                  FROM reviews
+                  WHERE id = ${id}`;
+        revalidatePath('/dashboard/reviews');
+        return {message: 'Review has been deleted.'};
+    } catch (error) {
+        return {message: 'Database Error: Failed to delete Review.'};
+    }
+}

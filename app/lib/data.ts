@@ -198,9 +198,12 @@ export async function fetchFilteredReviews(
     const reviews = await sql<ReviewsTable>`
       SELECT
         reviews.id,
-        reviews.created_at,
+        reviews.customer_id,
+        reviews.title,
         reviews.status,
-        customers.name,
+        reviews.created_at,
+        reviews.updated_at,
+        customers.name AS author_name,
         customers.email,
         customers.image_url
       FROM reviews
@@ -212,7 +215,7 @@ export async function fetchFilteredReviews(
         reviews.updated_at::text ILIKE ${`%${query}%`} OR
         reviews.title ILIKE ${`%${query}%`} OR
         reviews.status ILIKE ${`%${query}%`}
-      ORDER BY reviews.created_at DESC
+      ORDER BY reviews.updated_at DESC
       LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
     `;
 
@@ -220,6 +223,38 @@ export async function fetchFilteredReviews(
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch reviews by filter.');
+  }
+}
+
+export async function fetchReviewById(id: string) {
+  try {
+    const data = await sql<ReviewsTable>`
+      SELECT
+        reviews.id,
+        reviews.customer_id,
+        reviews.title,
+        reviews.status,
+        reviews.created_at,
+        reviews.updated_at,
+        reviews.text,
+        customers.name AS author_name,
+        customers.email,
+        customers.image_url
+      FROM reviews
+      JOIN customers ON reviews.customer_id = customers.id
+      WHERE reviews.id = ${id};
+    `;
+
+    const review = data.rows.map((review) => ({
+      ...review,
+      // Convert amount from cents to dollars
+      // amount: invoice.amount / 100,
+    }));
+    console.log(review);
+    return review[0];
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch review by id.');
   }
 }
 
