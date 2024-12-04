@@ -81,7 +81,7 @@ export type InvoicesTable = {
   status: 'pending' | 'paid';
 };
 
-export type CustomersTableType = {
+export type CustomersTable = {
   id: string;
   name: string;
   email: string;
@@ -89,16 +89,8 @@ export type CustomersTableType = {
   total_invoices: number;
   total_pending: number;
   total_paid: number;
-};
-
-export type FormattedCustomersTable = {
-  id: string;
-  name: string;
-  email: string;
-  image_url: string;
-  total_invoices: number;
-  total_pending: string;
-  total_paid: string;
+  total_pending_reviews: number;
+  total_published_reviews: number;
 };
 
 export type CustomerField = {

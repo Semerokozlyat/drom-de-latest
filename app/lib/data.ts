@@ -1,7 +1,6 @@
 import { sql } from '@vercel/postgres';
 import {
-  CustomerField,
-  CustomersTableType,
+  CustomerField, CustomersTable,
   InvoiceForm,
   InvoicesTable,
   LatestInvoiceRaw,
@@ -81,6 +80,32 @@ export async function fetchCardData() {
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch card data.');
+  }
+}
+
+export async function fetchReviewsCardData() {
+  try {
+    // You can probably combine these into a single SQL query
+    // However, we are intentionally splitting them to demonstrate
+    // how to initialize multiple queries in parallel with JS.
+    const reviewsCountPromise = sql`SELECT COUNT(*) FROM reviews WHERE status IN ('published', 'pending')`;
+    const authorsCountPromise = sql`SELECT COUNT(*) FROM customers`;
+
+    const data = await Promise.all([
+      reviewsCountPromise,
+      authorsCountPromise,
+    ]);
+
+    const numberOfReviews = Number(data[0].rows[0].count ?? '0');
+    const numberOfAuthors = Number(data[1].rows[0].count ?? '0');
+
+    return {
+      numberOfReviews,
+      numberOfAuthors,
+    };
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch reviews card data.');
   }
 }
 
@@ -278,33 +303,29 @@ export async function fetchCustomers() {
 
 export async function fetchFilteredCustomers(query: string) {
   try {
-    const data = await sql<CustomersTableType>`
+    const data = await sql<CustomersTable>`
 		SELECT
 		  customers.id,
 		  customers.name,
 		  customers.email,
 		  customers.image_url,
-		  COUNT(invoices.id) AS total_invoices,
-		  SUM(CASE WHEN invoices.status = 'pending' THEN invoices.amount ELSE 0 END) AS total_pending,
-		  SUM(CASE WHEN invoices.status = 'paid' THEN invoices.amount ELSE 0 END) AS total_paid
+		  COUNT(reviews.id) AS total_published_reviews
 		FROM customers
-		LEFT JOIN invoices ON customers.id = invoices.customer_id
+		LEFT JOIN reviews ON customers.id = reviews.customer_id
 		WHERE
 		  customers.name ILIKE ${`%${query}%`} OR
-        customers.email ILIKE ${`%${query}%`}
+          customers.email ILIKE ${`%${query}%`}
 		GROUP BY customers.id, customers.name, customers.email, customers.image_url
 		ORDER BY customers.name ASC
 	  `;
 
     const customers = data.rows.map((customer) => ({
       ...customer,
-      total_pending: formatCurrency(customer.total_pending),
-      total_paid: formatCurrency(customer.total_paid),
     }));
 
     return customers;
   } catch (err) {
     console.error('Database Error:', err);
-    throw new Error('Failed to fetch customer table.');
+    throw new Error('Failed to fetch reviews authors (customers) table.');
   }
 }
