@@ -1,6 +1,6 @@
 import { sql } from '@vercel/postgres';
 import {
-  CustomerField, CustomersTable,
+  CustomerField, CustomersTable, ImagesTable,
   InvoiceForm,
   InvoicesTable,
   LatestInvoiceRaw,
@@ -280,6 +280,35 @@ export async function fetchReviewById(id: string) {
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch review by id.');
+  }
+}
+
+const IMAGES_LIMIT = 1000;
+
+export async function fetchImages(
+    document_id: string,
+    document_type: string,
+) {
+
+  try {
+    const images = await sql<ImagesTable>`
+      SELECT
+        images.id,
+        images.document_id,
+        images.document_type,
+        images.url
+      FROM images
+      WHERE
+        images.document_id = ${document_id} AND
+        images.document_type = ${document_type}
+      ORDER BY images.id DESC
+      LIMIT ${IMAGES_LIMIT}
+    `;
+
+    return images.rows;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch images.');
   }
 }
 

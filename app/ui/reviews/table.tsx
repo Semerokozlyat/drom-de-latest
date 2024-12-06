@@ -3,6 +3,8 @@ import Image from "next/image";
 import ReviewStatus from "@/app/ui/reviews/status";
 import { formatDateToLocal } from "@/app/lib/utils";
 import {DeleteReview, ObserveReview, UpdateReview} from "@/app/ui/reviews/buttons";
+import {DocumentTextIcon} from "@heroicons/react/24/outline";
+import Link from "next/link";
 
 export default async function ReviewsTable(
     {query, currentPage}: {
@@ -89,7 +91,12 @@ export default async function ReviewsTable(
                                     </div>
                                 </td>
                                 <td className="whitespace-nowrap px-3 py-3">
-                                    {review.title}
+                                    <Link
+                                        href={`/dashboard/reviews/${review.id}`}
+                                        className="rounded-md p-2 hover:bg-gray-100"
+                                    >
+                                        {review.title}
+                                    </Link>
                                 </td>
                                 <td className="whitespace-nowrap px-3 py-3">
                                     {formatDateToLocal(review.updated_at)}

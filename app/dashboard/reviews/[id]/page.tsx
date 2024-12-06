@@ -1,16 +1,18 @@
 import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
-import { fetchReviewById,  fetchCustomers } from '@/app/lib/data';
+import {fetchReviewById, fetchCustomers, fetchImages} from '@/app/lib/data';
 import { notFound } from 'next/navigation';
 import Link from "next/link";
 import Image from "next/image";
 import {formatDateToLocal} from "@/app/lib/utils";
+import ImageGallery from "@/app/ui/reviews/image_gallery";
 
 export default async function Page(props: {params: Promise<{id: string}>}) {
     const params = await props.params;
     const id = params.id;
-    const [review, customers] = await Promise.all([  // Promise.all here to fetch all data in parallel
+    const [review, customers, reviewImages] = await Promise.all([  // Promise.all here to fetch all data in parallel
         fetchReviewById(id),
         fetchCustomers(),
+        fetchImages(id, "review"),
     ]);
 
     // Return 404 and UI from the "not-found.tsx" file if invoice is not found in database.
@@ -43,6 +45,9 @@ export default async function Page(props: {params: Promise<{id: string}>}) {
             </div>
             <div className="flex items-center gap-3">
                 <p>{review.text}</p>
+            </div>
+            <div className="flex items-center gap-3">
+                <ImageGallery images={reviewImages}/>
             </div>
             <div className="flex items-center gap-3">
             <Link

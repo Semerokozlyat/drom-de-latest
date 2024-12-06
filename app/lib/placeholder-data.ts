@@ -78,6 +78,24 @@ const reviews = [
   },
 ]
 
+const images = [
+  {
+    document_id: '474e8849-f5e1-40d1-8d46-1172b8625db7',
+    document_type: 'review',
+    url: '/customers/evil-rabbit.png',
+  },
+  {
+    document_id: '474e8849-f5e1-40d1-8d46-1172b8625db7',
+    document_type: 'review',
+    url: '/customers/lee-robinson.png',
+  },
+  {
+    document_id: '474e8849-f5e1-40d1-8d46-1172b8625db7',
+    document_type: 'review',
+    url: '/customers/balazs-orban.png',
+  },
+];
+
 const invoices = [
   {
     customer_id: customers[0].id,
@@ -174,4 +192,4 @@ const revenue = [
   { month: 'Dec', revenue: 4800 },
 ];
 
-export { users, customers, invoices, revenue, reviews };
+export { users, customers, invoices, revenue, reviews, images };

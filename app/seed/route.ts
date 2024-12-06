@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import { db } from '@vercel/postgres';
-import { invoices, customers, revenue, users, reviews } from '../lib/placeholder-data';
+import {invoices, customers, revenue, users, reviews, images} from '../lib/placeholder-data';
 
 const client = await db.connect();
 
@@ -84,6 +84,31 @@ async function seedReviews() {
   return insertedReviews;
 }
 
+async function seedImages() {
+  await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+
+  await client.sql`
+    CREATE TABLE IF NOT EXISTS images (
+      id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+      document_id UUID NOT NULL,
+      document_type VARCHAR(255) NOT NULL,
+      url VARCHAR(2048) NOT NULL
+    );
+  `;
+
+  const insertedImages = await Promise.all(
+      images.map(
+          (image) => client.sql`
+        INSERT INTO images (document_id, document_type, url)
+        VALUES (${image.document_id}, ${image.document_type}, ${image.url})
+        ON CONFLICT (id) DO NOTHING;
+      `,
+      ),
+  );
+
+  return insertedImages;
+}
+
 async function seedCustomers() {
   await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
 
@@ -138,6 +163,7 @@ export async function GET() {
     await seedInvoices();
     await seedRevenue();
     await seedReviews();
+    await seedImages();
     await client.sql`COMMIT`;
 
     return Response.json({ message: 'Database seeded successfully' });

@@ -52,6 +52,13 @@ export type ReviewsTable = {
   text: string;
 };
 
+export type ImagesTable = {
+  id: string;
+  document_id: string;
+  document_type: 'review' | 'ad';
+  url: string;
+};
+
 export type Revenue = {
   month: string;
   revenue: number;
