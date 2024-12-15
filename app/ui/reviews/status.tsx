@@ -1,4 +1,4 @@
-import {CheckIcon, ClockIcon, DocumentIcon} from '@heroicons/react/24/outline';
+import {ArchiveBoxArrowDownIcon, CheckIcon, ClockIcon} from '@heroicons/react/24/outline';
 import clsx from 'clsx';
 
 export default function ReviewStatus({ status }: { status: string }) {
@@ -28,7 +28,7 @@ export default function ReviewStatus({ status }: { status: string }) {
       {status === 'archived' ? (
         <>
           Archived
-          <DocumentIcon className="ml-1 w-4 text-gray-500" />
+          <ArchiveBoxArrowDownIcon className="ml-1 w-4 text-gray-500" />
         </>
       ) : null}
     </span>

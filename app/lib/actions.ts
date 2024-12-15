@@ -121,6 +121,68 @@ export async function deleteInvoice(id: string) {
 
 // Actions with Reviews
 
+const ReviewCreateFormSchema = z.object({
+    id: z.string(),
+    customerId: z.string({ invalid_type_error: 'Please select an author.' }),
+    title: z.string({ invalid_type_error: 'Please select enter a title.' }),
+    status: z.enum(['pending', 'published', 'archived'], {invalid_type_error: 'Please select a valid review status.'}),
+    created_at: z.string(),
+    updated_at: z.string(),
+    //nextPartId: z.string(),
+    text: z.string(),
+});
+
+const CreateReview = ReviewCreateFormSchema.omit({id: true, created_at: true, updated_at: true});
+
+export type CreateReviewState = {
+    errors?: {
+        customerId?: string[];
+        title?: string[];
+        status?: string[];
+    };
+    message?: string | null;
+}
+
+// prevState - contains the state passed from the useActionState hook.
+export async function createReview(prevState: CreateReviewState, formData: FormData) {
+
+    // Validate form fields using Zod
+    const validatedFields = CreateReview.safeParse({
+        customerId: formData.get('customerId'),
+        title: formData.get('title'),
+        status: formData.get('status'),
+        // nextPartId: formData.get('nextPartId'),
+        text: formData.get('text'),
+    });
+
+    // If form validation fails, return errors early. Otherwise, continue.
+    if (!validatedFields.success) {
+        return {
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: 'Missing Fields. Failed to Create a Review.',
+        };
+    }
+
+    // Prepare data for insertion into the database
+    const { customerId, title, status, text } = validatedFields.data;
+    const nextPartId = "4f758f9c-721f-4e4e-9715-eaa6655cbee3"  // UUID of an existing review
+    const createdAt = new Date().toISOString().split('T')[0];
+    const updatedAt = new Date().toISOString().split('T')[0];
+
+    // Insert data into the 'reviews' database
+    try {
+        await sql`
+            INSERT INTO reviews (customer_id, title, status, created_at, updated_at, next_part_id, text)
+            VALUES (${customerId}, ${title}, ${status}, ${createdAt}, ${updatedAt}, ${nextPartId}, ${text})
+        `;
+    } catch (error) {
+        return {message: 'Database Error: Failed to create a Review: ' + error.message};
+    }
+
+    revalidatePath('/dashboard/reviews');  // invalidate browser client cache once database is updated
+    redirect('/dashboard/reviews');
+}
+
 export async function deleteReview(id: string) {
     try {
         await sql`DELETE
