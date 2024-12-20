@@ -6,6 +6,9 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
+import mime from 'mime';
+import { join } from 'path';
+import { stat, writeFile } from 'fs/promises';
 
 export async function authenticate(prevState: string | undefined, formData: FormData) {
     try {
@@ -72,7 +75,7 @@ export async function createInvoice(prevState: State, formData: FormData) {
             VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
         `;
     } catch (error) {
-        return {message: 'Database Error: Failed to create Invoice.'};
+        return {message: 'Database Error: Failed to create Invoice.', error};
     }
 
     revalidatePath('/dashboard/invoices');  // invalidate browser client cache once database is updated
@@ -100,7 +103,7 @@ export async function updateInvoice(id: string, formData: FormData) {
             WHERE id = ${id}
         `;
     } catch (error) {
-        return {message: 'Database Error: Failed to update Invoice.'};
+        return {message: 'Database Error: Failed to update Invoice.', error};
     }
 
     revalidatePath('/dashboard/invoices');
@@ -115,7 +118,7 @@ export async function deleteInvoice(id: string) {
         revalidatePath('/dashboard/invoices');
         return {message: 'Invoice has been deleted.'};
     } catch (error) {
-        return {message: 'Database Error: Failed to delete Invoice.'};
+        return {message: 'Database Error: Failed to delete Invoice.', error};
     }
 }
 
@@ -128,6 +131,7 @@ const ReviewCreateFormSchema = z.object({
     status: z.enum(['pending', 'published', 'archived'], {invalid_type_error: 'Please select a valid review status.'}),
     created_at: z.string(),
     updated_at: z.string(),
+    image: z.string(),
     //nextPartId: z.string(),
     text: z.string(),
 });
@@ -146,11 +150,15 @@ export type CreateReviewState = {
 // prevState - contains the state passed from the useActionState hook.
 export async function createReview(prevState: CreateReviewState, formData: FormData) {
 
+    const imageFiles = formData.get('images') as File;
+    const imageURL = await saveFile(imageFiles);
+
     // Validate form fields using Zod
     const validatedFields = CreateReview.safeParse({
         customerId: formData.get('customerId'),
         title: formData.get('title'),
         status: formData.get('status'),
+        image: imageURL,
         // nextPartId: formData.get('nextPartId'),
         text: formData.get('text'),
     });
@@ -164,7 +172,7 @@ export async function createReview(prevState: CreateReviewState, formData: FormD
     }
 
     // Prepare data for insertion into the database
-    const { customerId, title, status, text } = validatedFields.data;
+    const { customerId, title, status, image, text } = validatedFields.data;
     const nextPartId = "4f758f9c-721f-4e4e-9715-eaa6655cbee3"  // UUID of an existing review
     const createdAt = new Date().toISOString().split('T')[0];
     const updatedAt = new Date().toISOString().split('T')[0];
@@ -176,11 +184,44 @@ export async function createReview(prevState: CreateReviewState, formData: FormD
             VALUES (${customerId}, ${title}, ${status}, ${createdAt}, ${updatedAt}, ${nextPartId}, ${text})
         `;
     } catch (error) {
-        return {message: 'Database Error: Failed to create a Review: ' + error.message};
+        return {message: 'Database Error: Failed to create a Review: ' + error};
+    }
+
+    // Insert corresponding entries into the 'images' table
+    const reviewID = "4f758f9c-721f-4e4e-9715-eaa6655cbee3" // TODO: calculate from prev insert!
+    try {
+        await sql`
+            INSERT INTO images (document_id, document_type, url)
+            VALUES (${reviewID}, 'review', ${image})
+        `;
+    } catch (error) {
+        return {message: 'Database Error: Failed to create a Review: ' + error};
     }
 
     revalidatePath('/dashboard/reviews');  // invalidate browser client cache once database is updated
     redirect('/dashboard/reviews');
+}
+
+async function saveFile(file: File) {
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const imagesDir = join(process.cwd(), '/public');
+    try {
+        await stat(imagesDir);
+    } catch (e: any) {
+        if (e.code == "ENOENT") {
+            console.error("failed to upload images, directory does not exist")
+        } else {
+            console.error("failed to upload images, internal server error: ", e)
+        }
+    }
+
+    const filename = `${file.name}.${mime.getExtension(file.type)}`;
+    try {
+        await writeFile(`${imagesDir}/${filename}`, buffer);
+    } catch (e) {
+        console.error("failed to write image file: ", e)
+    }
+    return filename;
 }
 
 export async function deleteReview(id: string) {
@@ -191,6 +232,6 @@ export async function deleteReview(id: string) {
         revalidatePath('/dashboard/reviews');
         return {message: 'Review has been deleted.'};
     } catch (error) {
-        return {message: 'Database Error: Failed to delete Review.'};
+        return {message: 'Database Error: Failed to delete Review.', error};
     }
 }

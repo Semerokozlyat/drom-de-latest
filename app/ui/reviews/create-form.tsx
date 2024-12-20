@@ -94,6 +94,25 @@ export default function CreateForm({ authors }: { authors: CustomerField[] }) {
           </div>
         </div>
 
+        {/* Review Photos */}
+        <div className="mb-4">
+          <label htmlFor="images" className="mb-2 block text-sm font-medium">
+            Your Photos
+          </label>
+          <div className="relative mt-2 rounded-md">
+            <div className="relative">
+              <input
+                  id="images"
+                  name="images"
+                  type="file"
+                  maxLength={1024 * 50}
+                  placeholder="Upload images"
+                  className="peer block w-full h-52 rounded-md border border-gray-200 p-2 py-2 pl-2 text-sm outline-2 placeholder:text-gray-500"
+              />
+            </div>
+          </div>
+        </div>
+
         {/* Review Status */}
         <fieldset>
           <legend className="mb-2 block text-sm font-medium">
