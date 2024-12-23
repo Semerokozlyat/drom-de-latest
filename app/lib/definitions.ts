@@ -26,17 +26,19 @@ export type Invoice = {
   status: 'pending' | 'paid';
 };
 
-export type Review = {
+// ReviewForm determines structure, used in forms: create and edit of a Review.
+export type ReviewForm = {
   id: string;
   customer_id: string;
   title: string;
-  // In TypeScript, this is called a string union type.
-  // It means that the "status" property can only be one of the following strings: 'pending', 'published' or 'archived'.
   status: 'pending' | 'published' | 'archived';
   created_at: string;
   updated_at: string;
+  author_name : string;  // taken from corresponding customer
+  image_url: string;   // taken from corresponding customer
   next_part_id: string;
   text: string;
+  photos: ImagesTable[];  // taken from "images" table
 };
 
 export type ReviewsTable = {

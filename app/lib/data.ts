@@ -4,7 +4,7 @@ import {
   InvoiceForm,
   InvoicesTable,
   LatestInvoiceRaw,
-  Revenue,
+  Revenue, ReviewForm,
   ReviewsTable,
 } from './definitions';
 import { formatCurrency } from './utils';
@@ -251,9 +251,9 @@ export async function fetchFilteredReviews(
   }
 }
 
-export async function fetchReviewById(id: string) {
+export async function fetchReviewByID(id: string) {
   try {
-    const data = await sql<ReviewsTable>`
+    const data = await sql<ReviewForm>`
       SELECT
         reviews.id,
         reviews.customer_id,
@@ -264,14 +264,21 @@ export async function fetchReviewById(id: string) {
         reviews.text,
         customers.name AS author_name,
         customers.email,
-        customers.image_url
+        customers.image_url,
+        ARRAY_AGG(images.url) AS photos
       FROM reviews
       JOIN customers ON reviews.customer_id = customers.id
-      WHERE reviews.id = ${id};
+      JOIN images ON images.document_id = reviews.id
+      WHERE reviews.id = ${id}
+      GROUP BY
+        reviews.id,
+        customers.name,
+        customers.email,
+        customers.image_url;
     `;
 
-    const review = data.rows.map((review) => ({
-      ...review,
+    const review = data.rows.map((dataRow) => ({
+      ...dataRow,
       // Convert amount from cents to dollars
       // amount: invoice.amount / 100,
     }));
@@ -279,7 +286,7 @@ export async function fetchReviewById(id: string) {
     return review[0];
   } catch (error) {
     console.error('Database Error:', error);
-    throw new Error('Failed to fetch review by id.');
+    throw new Error('Failed to fetch individual review by id.');
   }
 }
 

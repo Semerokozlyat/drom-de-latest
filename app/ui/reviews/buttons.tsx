@@ -1,5 +1,5 @@
-import {PencilIcon, PlusIcon, TrashIcon, DocumentTextIcon, ArrowRightCircleIcon} from '@heroicons/react/24/outline';
 import Link from 'next/link';
+import {PencilIcon, PlusIcon, TrashIcon, DocumentTextIcon, ArrowRightCircleIcon} from '@heroicons/react/24/outline';
 import { deleteReview } from '@/app/lib/actions';
 
 export function MyReviews() {
@@ -46,6 +46,18 @@ export function UpdateReview({ id }: { id: string }) {
       <PencilIcon className="w-5" />
     </Link>
   );
+}
+
+export function UpdateReviewOwnPage({ id }: { id: string }) {
+    return (
+        <Link
+            href={`/dashboard/reviews/${id}/edit`}
+            className="flex h-10 items-center rounded-lg bg-orange-600 px-2 text-sm font-medium text-white transition-colors hover:bg-orange-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600"
+        >
+            <span className="hidden md:block">Edit Review</span>{' '}
+            <PencilIcon className="h-5 md:ml-4" />
+        </Link>
+    );
 }
 
 export function DeleteReview({ id }: { id: string }) {

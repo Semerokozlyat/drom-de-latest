@@ -204,6 +204,50 @@ export async function createReview(prevState: CreateReviewState, formData: FormD
     redirect('/dashboard/reviews');
 }
 
+// Use Zod to update the expected types
+const ReviewUpdateFormSchema = z.object({
+    id: z.string(),
+    customerId: z.string({ invalid_type_error: 'Please select an author.' }),
+    title: z.string({ invalid_type_error: 'Please select enter a title.' }),
+    status: z.enum(['pending', 'published', 'archived'], {invalid_type_error: 'Please select a valid review status.'}),
+    // image: z.string(),
+    // nextPartId: z.string(),
+    text: z.string(),
+});
+
+const UpdateReview = ReviewUpdateFormSchema.omit({ id: true });
+
+export async function updateReview(id: string, formData: FormData) {
+
+    // Validate form fields using Zod
+    const { customerId, title, status, text } = UpdateReview.parse({
+        customerId: formData.get('customerId'),
+        title: formData.get('title'),
+        status: formData.get('status'),
+        // image: formData.get('images'),
+        // nextPartId: formData.get('nextPartId'),
+        text: formData.get('text'),
+    });
+    const updatedAt = new Date().toISOString().split('T')[0];
+
+    try {
+        await sql`
+            UPDATE reviews
+            SET customer_id = ${customerId},
+                title       = ${title},
+                status      = ${status},
+                text        = ${text},
+                updated_at  = ${updatedAt}
+            WHERE id = ${id}
+        `;
+    } catch (error) {
+        return {message: 'Database Error: Failed to update Review.', error};
+    }
+
+    revalidatePath('/dashboard/reviews');
+    redirect('/dashboard/reviews');  // redirect returns an error internally, it must be called outside the try / catch block.
+}
+
 async function saveFile(file: File) {
     let buffer = Buffer.from(await file.arrayBuffer());
     // Zoom-able images must be in .png format

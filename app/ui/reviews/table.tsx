@@ -106,7 +106,7 @@ export default async function ReviewsTable(
                                 </td>
                                 <td className="whitespace-nowrap py-3 pl-6 pr-3">
                                     <div className="flex justify-end gap-3">
-                                        <ObserveReview id={review.id} />
+                                        <UpdateReview id={review.id} />
                                         <DeleteReview id={review.id} />
                                     </div>
                                 </td>
