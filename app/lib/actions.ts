@@ -1,12 +1,14 @@
 'use server';  // i.e. mark all exported functions as Server Actions
 
 import { z } from 'zod';
-import { sql } from '@vercel/postgres';
+import { v4 as uuidv4 } from 'uuid';
+import {QueryResult, QueryResultRow, sql} from '@vercel/postgres';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
 import mime from 'mime';
+import sharp from "sharp";
 import { join } from 'path';
 import { stat, writeFile } from 'fs/promises';
 
@@ -147,6 +149,10 @@ export type CreateReviewState = {
     message?: string | null;
 }
 
+interface ReviewDBRow extends QueryResultRow {
+    id: string;
+}
+
 // prevState - contains the state passed from the useActionState hook.
 export async function createReview(prevState: CreateReviewState, formData: FormData) {
 
@@ -177,24 +183,20 @@ export async function createReview(prevState: CreateReviewState, formData: FormD
     const createdAt = new Date().toISOString().split('T')[0];
     const updatedAt = new Date().toISOString().split('T')[0];
 
-    // Insert data into the 'reviews' database
     try {
-        await sql`
+        // Insert data into the 'reviews' database
+        const result: QueryResult<ReviewDBRow> = await sql`
             INSERT INTO reviews (customer_id, title, status, created_at, updated_at, next_part_id, text)
             VALUES (${customerId}, ${title}, ${status}, ${createdAt}, ${updatedAt}, ${nextPartId}, ${text})
+            RETURNING id
         `;
-    } catch (error) {
-        return {message: 'Database Error: Failed to create a Review: ' + error};
-    }
-
-    // Insert corresponding entries into the 'images' table
-    const reviewID = "4f758f9c-721f-4e4e-9715-eaa6655cbee3" // TODO: calculate from prev insert!
-    try {
+        // and into the 'images' table
         await sql`
             INSERT INTO images (document_id, document_type, url)
-            VALUES (${reviewID}, 'review', ${image})
+            VALUES (${result.rows[0].id}::uuid, 'review', ${image})
         `;
     } catch (error) {
+        console.log(error);
         return {message: 'Database Error: Failed to create a Review: ' + error};
     }
 
@@ -203,8 +205,14 @@ export async function createReview(prevState: CreateReviewState, formData: FormD
 }
 
 async function saveFile(file: File) {
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const imagesDir = join(process.cwd(), '/public');
+    let buffer = Buffer.from(await file.arrayBuffer());
+    // Zoom-able images must be in .png format
+    console.log(file.type);
+    if (file.type != 'image/png') {
+        buffer = await sharp(buffer).png().toBuffer();
+    }
+
+    const imagesDir = join(process.cwd(), '/public', 'photos');
     try {
         await stat(imagesDir);
     } catch (e: any) {
@@ -215,13 +223,13 @@ async function saveFile(file: File) {
         }
     }
 
-    const filename = `${file.name}.${mime.getExtension(file.type)}`;
+    const filename = `${uuidv4()}.${mime.getExtension(file.type)}`;
     try {
         await writeFile(`${imagesDir}/${filename}`, buffer);
     } catch (e) {
         console.error("failed to write image file: ", e)
     }
-    return filename;
+    return join('/photos', filename);
 }
 
 export async function deleteReview(id: string) {

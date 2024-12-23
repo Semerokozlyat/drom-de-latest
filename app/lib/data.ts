@@ -294,7 +294,6 @@ export async function fetchImages(
     const images = await sql<ImagesTable>`
       SELECT
         images.id,
-        images.document_id,
         images.document_type,
         images.url
       FROM images
@@ -304,7 +303,6 @@ export async function fetchImages(
       ORDER BY images.id DESC
       LIMIT ${IMAGES_LIMIT}
     `;
-
     return images.rows;
   } catch (error) {
     console.error('Database Error:', error);

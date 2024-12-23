@@ -61,7 +61,7 @@ export default function ImageGallery({ images }: { images: ImagesTable[] }) {
                 />
             </div>
             ))}
-            {zoomedImage && <div style={{ height: '200px' }} key={images[1].id} onClick={closeZoomedImage}>
+            {zoomedImage && <div style={{ height: '200px' }} onClick={closeZoomedImage}>
                 <Image
                     alt="Mountains"
                     src={zoomedImage}

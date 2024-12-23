@@ -16,12 +16,12 @@ export default async function Page(props: {params: Promise<{id: string}>}) {
         fetchImages(id, "review"),
     ]);
 
-    // TODO: remove
-    const reviewImagesTest: ImagesTable[] = [
-        {id: '1', document_id: id, document_type: 'review', url: '/customers/evil-rabbit.png'},
-        {id: '2', document_id: id, document_type: 'review', url: '/customers/lee-robinson.png'},
-        {id: '3', document_id: id, document_type: 'review', url: '/customers/amy-burns.png'},
-    ]
+    // // TODO: remove
+    // const reviewImagesTest: ImagesTable[] = [
+    //     {id: '1', document_id: id, document_type: 'review', url: '/customers/evil-rabbit.png'},
+    //     {id: '2', document_id: id, document_type: 'review', url: '/customers/lee-robinson.png'},
+    //     {id: '3', document_id: id, document_type: 'review', url: '/customers/amy-burns.png'},
+    // ]
 
     // Return 404 and UI from the "not-found.tsx" file if invoice is not found in database.
     if (!review) {
@@ -52,7 +52,7 @@ export default async function Page(props: {params: Promise<{id: string}>}) {
                 {formatDateToLocal(review.updated_at)}
             </div>
             <div className="flex items-center gap-3">
-                <ImageGallery images={reviewImagesTest}/>
+                <ImageGallery images={reviewImages}/>
             </div>
             <div className="flex items-center gap-3">
                 <p>{review.text}</p>
